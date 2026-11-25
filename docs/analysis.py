@@ -399,8 +399,9 @@ def qui_quadrado(df: pd.DataFrame, linha: str, coluna: str, seed=SEED) -> dict:
             # Tabela maior que 2×2: Fisher exato não está disponível no scipy;
             # usa-se o p de permutação (Monte Carlo) do qui-quadrado. Ver desvios.md.
             rng = np.random.default_rng(seed)
-            x = np.repeat(np.arange(tab.shape[0]), tab.sum(axis=1))
-            yv = np.concatenate([np.repeat(np.arange(tab.shape[1]), r) for r in tab.to_numpy()])
+            cont = tab.to_numpy().astype(np.intp)  # intp: compatível com Pyodide (32 bits)
+            x = np.repeat(np.arange(tab.shape[0]), cont.sum(axis=1))
+            yv = np.concatenate([np.repeat(np.arange(tab.shape[1]), r) for r in cont])
             obs = chi2
             maior = 0
             B = 5000
