@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Survey Clareza e Retrabalho</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@0.80.5/build/style.css" />
+<style>body{margin:0;background:#fff}#load{font-family:sans-serif;color:#555;padding:40px;text-align:center}</style>
+</head>
+<body>
+<div id="root"><div id="load">Carregando o dashboard no navegador (pode levar ~30 s na primeira vez)…</div></div>
+<script type="module">
+import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@0.80.5/build/stlite.js";
+const f = p => ({ url: "./" + p });
+mount({
+  requirements: ["plotly", "scipy"],
+  entrypoint: "app.py",
+  files: {
+    "app.py": f("app.py"),
+    "analysis.py": f("analysis.py"),
+    "desvios.md": f("desvios.md"),
+    ".streamlit/config.toml": f(".streamlit/config.toml"),
+    "dados/respostas_brutas.csv": f("dados/respostas_brutas.csv"),
+    "evidencias/1_whatsapp_forceone.png": f("evidencias/1_whatsapp_forceone.png"),
+    "evidencias/2_whatsapp_ti.png": f("evidencias/2_whatsapp_ti.png"),
+    "evidencias/3_discord_fab_software.png": f("evidencias/3_discord_fab_software.png"),
+    "evidencias/4_whatsapp_pinguins.png": f("evidencias/4_whatsapp_pinguins.png"),
+  },
+}, document.getElementById("root"));
+</script>
+</body>
+</html>
