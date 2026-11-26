@@ -230,7 +230,7 @@ def preparar(bruto: pd.DataFrame, m: Mapeamento) -> pd.DataFrame:
                                             regex=True)
         df["E1::Outra"] = restante.str.replace(r"[\s,;]", "", regex=True).str.len() > 0
         df["E1_respondeu"] = e1.str.len() > 0
-    # E2 (aberta) não é carregada: não é exibida nem exportada pelo dashboard.
+    # E2 (aberta) é codificada em codificar_e2(); o texto não é exibido.
     df["M1"] = df[[i for i in CLAREZA if i in df]].mean(axis=1, skipna=False)
     df["M2"] = df[[i for i in RETRABALHO if i in df]].mean(axis=1, skipna=False)
     df["M3"] = df[[i for i in INSTABILIDADE if i in df]].mean(axis=1, skipna=False)
@@ -446,3 +446,38 @@ def resumo_iqr(s: pd.Series) -> str:
     if s.empty:
         return "—"
     return f"{s.median():.2f} (IIQ {s.quantile(.25):.2f}–{s.quantile(.75):.2f})"
+
+
+# ---------------------------------------------------------------------------
+# Codificação das respostas abertas (E2)
+# ---------------------------------------------------------------------------
+# Livro de códigos: cada resposta pode receber mais de um código (multi-rótulo).
+# A regra é um dicionário de termos (texto normalizado, sem acento). O texto
+# em si nunca é exibido no dashboard, apenas a contagem por código.
+CODIGOS_E2 = {
+    "Critérios de aceitação / BDD": [r"criterio", r"dado/quando", r"\bbdd\b", r"cenario", r"pronto"],
+    "Comunicação direta (PO, cliente, time)": [r"\bpo\b", r"cliente", r"convers", r"comunicacao",
+                                               r"falar direto", r"quem pediu", r"quem decide",
+                                               r"tirar duvida", r"pergunt"],
+    "Protótipos / wireframes": [r"prototip", r"wireframe", r"desenha"],
+    "Histórias de usuário": [r"historia", r"user stor"],
+    "Documentação / registro escrito": [r"document", r"registro escrito", r"especifica", r"escrito"],
+    "Alinhamento / refinamento em time": [r"refinamento", r"time todo", r"revisad", r"alinha"],
+    "Controle de escopo e mudanças": [r"escopo", r"mudanc", r"\bmudar\b", r"muda\b", r"entregas menores",
+                                      r"prioridade"],
+    "Falta de processo / padronização": [r"processo formal", r"padrao", r"estruturad", r"burocr",
+                                         r"sem muita explicacao", r"nao conheco"],
+}
+
+
+def codificar_e2(bruto: pd.DataFrame, m: Mapeamento) -> pd.DataFrame:
+    """Retorna DataFrame booleano (linhas = respostas, colunas = códigos)."""
+    if "E2" not in m.colunas:
+        return pd.DataFrame(index=bruto.index)
+    txt = bruto[m.colunas["E2"]].fillna("").map(norm)
+    out = pd.DataFrame(index=bruto.index)
+    for cod, termos in CODIGOS_E2.items():
+        out[cod] = txt.str.contains("|".join(termos), regex=True)
+    out["_respondeu"] = txt.str.len() > 0
+    out["Não codificada"] = out["_respondeu"] & ~out[list(CODIGOS_E2)].any(axis=1)
+    return out

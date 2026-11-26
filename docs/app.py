@@ -68,6 +68,9 @@ def carregar(conteudo: bytes):
     bruto, m = an.carregar(io.BytesIO(conteudo))
     df = an.preparar(bruto, m)
     df["Motivo"] = an.aplicar_descartes(bruto, df, m)
+    cod = an.codificar_e2(bruto, m)
+    for c in cod.columns:
+        df["E2::" + c] = cod[c]
     return df, m
 
 
@@ -576,6 +579,43 @@ with abas[3]:
     else:
         st.write("Sem respostas para E1 no segmento.")
 
+    # ---------- E2 (aberta) codificada
+    st.subheader("Respostas abertas (E2): qual prática mais ajuda a evitar retrabalho?")
+    if "E2::_respondeu" in df and df["E2::_respondeu"].any():
+        base = df[df["E2::_respondeu"]]
+        ne2 = len(base)
+        cods = [c for c in df.columns if c.startswith("E2::") and c != "E2::_respondeu"]
+        linhas = []
+        for c in cods:
+            k = int(base[c].sum())
+            lo, hi = an.wilson(k, ne2)
+            linhas.append({"Código": c[4:], "k": k, "p": k / ne2, "lo": lo, "hi": hi})
+        e2 = pd.DataFrame(linhas)
+        e2 = e2[(e2["k"] > 0) | (e2["Código"] != "Não codificada")].sort_values("p")
+        fig = go.Figure(go.Bar(
+            y=e2["Código"], x=e2["p"] * 100, orientation="h", marker_color="#7a9cc6",
+            error_x=dict(type="data", symmetric=False, array=(e2["hi"] - e2["p"]) * 100,
+                         arrayminus=(e2["p"] - e2["lo"]) * 100, color="#555"),
+            text=[f"{k} ({v * 100:.0f}%)" for k, v in zip(e2["k"], e2["p"])],
+            textposition="outside"))
+        fig.update_layout(xaxis=dict(title=f"% das {ne2} respostas abertas", range=[0, 100]),
+                          height=120 + 42 * len(e2), margin=dict(t=20, l=10))
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption(f"{ne2} de {len(df)} respondentes válidos escreveram algo em E2 (pergunta "
+                   "opcional). Codificação multi-rótulo: uma resposta pode citar mais de uma "
+                   "prática, então os percentuais somam mais de 100%. IC 95% de Wilson.")
+        with st.expander("Livro de códigos (regra de codificação)"):
+            st.markdown("Codificação por dicionário de termos aplicada ao texto normalizado "
+                        "(minúsculas, sem acento). O texto das respostas não é exibido, para "
+                        "preservar o anonimato.")
+            st.dataframe(pd.DataFrame({"Código": list(an.CODIGOS_E2),
+                                       "Termos que ativam o código": [", ".join(t) for t in
+                                                                      an.CODIGOS_E2.values()]}),
+                         hide_index=True, use_container_width=True)
+    else:
+        st.info("A coluna E2 não está presente neste CSV (na versão publicada ela é removida "
+                "por LGPD).")
+
 # ================================================================ 5 Explorar
 with abas[4]:
     st.warning("**Análise exploratória livre.** Os testes desta aba NÃO são os do pré-registro "
@@ -679,7 +719,7 @@ with abas[5]:
 - **Duplicata:** linhas idênticas em todas as colunas exceto o carimbo de data/hora (mantém a primeira).
 - **Testes:** Spearman + bootstrap (QP1); Kruskal-Wallis + Dunn, Mann-Whitney, qui-quadrado/Fisher (QP2); Wilson (QP3). α = 0,05, Holm por família, p bruto e ajustado.
 - **Margem de erro:** e = 1,96·√(0,25/n), recalculada com os filtros.
-- **Privacidade:** o dashboard mostra apenas agregados; não lê nem exibe a resposta aberta E2.
+- **Respostas abertas (E2):** codificadas por dicionário de termos (livro de códigos na aba Questões de pesquisa), multi-rótulo; o dashboard mostra só contagens por código, nunca o texto.\n- **Privacidade:** o dashboard mostra apenas agregados.
 """)
     st.header("Desvios em relação ao protocolo")
     if DESVIOS.exists():
