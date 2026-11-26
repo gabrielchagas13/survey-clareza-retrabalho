@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+# Dados brutos ficam em repositório privado (protocolo, seção 6)
+dados/*.csv
+*.zip
+.DS_Store

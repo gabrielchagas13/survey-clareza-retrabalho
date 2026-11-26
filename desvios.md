@@ -1,0 +1,12 @@
+| # | O que mudou | Protocolo (Parte 1) | Executado | Justificativa | Impacto |
+|---|---|---|---|---|---|
+| 1 | Critério de descarte (d), tempo de preenchimento | Descartar quem levou menos de 1/3 da mediana do pré-teste | Não aplicado | O Google Forms não exporta a duração do preenchimento | Respostas apressadas são filtradas só por A1 e straight-lining |
+| 2 | Valor esperado em A1 | "Concordo parcialmente (3)" | Valor 4 = "Concordo parcialmente" | Na escala publicada, "Concordo parcialmente" é o ponto 4 (3 é "Nem concordo nem discordo"); vale o texto da instrução | Nenhum: o respondente vê só o texto |
+| 3 | Opções de E1 | Inclui "refinamento" | O formulário não traz "refinamento" como opção | [CONFIRMAR: opção removida no pré-teste ou esquecida?] | Refinamento só aparece se escrito em "Outra"; proporção subestimada |
+| 4 | Qui-quadrado da QP2 | "porte ou forma de trabalho × categorias nominais" (variável não especificada) | Porte e forma de trabalho × nível de retrabalho (M2 ≥ 3 vs. M2 < 3) | Era preciso fixar uma variável de resposta categórica; o corte 3 = "às vezes" | Decisão tomada antes de olhar os resultados [CONFIRMAR] |
+| 5 | Fisher em tabelas maiores que 2×2 | Fisher quando as esperadas forem < 5 | Fisher em 2×2; em tabelas maiores, p por permutação (5.000) do qui-quadrado | O scipy não implementa Fisher exato para R×C | Equivalente na prática (teste exato condicional aproximado) |
+| 6 | Pré-teste | 4 pessoas, tempo mediano | [PREENCHER: quem participou, problemas e mudanças] | | |
+| 7 | Período de coleta | 14 dias, lembretes nos dias 5 e 10 | 20/11/2026 a 24/11/2026 (5 dias) [CONFIRMAR justificativa] | | |
+| 8 | Pergunta de atenção A1 | Item A1 ("marque Concordo parcialmente") e critério de descarte (c) | A1 não foi incluída no formulário publicado | [CONFIRMAR: esquecida na montagem do Forms ou removida no pré-teste?] | Critério (c) não aplicado; respostas descuidadas filtradas apenas por straight-lining (e) e duplicatas (f) |
+| 9 | Escala de R3 | Concordância (Discordo totalmente → Concordo totalmente) | Frequência (Nunca → Sempre) | Formulário publicado com a grade de frequência | R1–R3 ficam na mesma escala; α do retrabalho calculado assim |
+| 10 | Faixas de experiência (P2) | <1, 1 a <3, 3 a <6, ≥6 anos | <1, 1–2, 3–6, 7–9, ≥10 anos (opções do formulário) | Faixas usadas como publicadas; anos = ponto médio da faixa para Spearman | Kruskal-Wallis com 5 grupos; grupos 7–9 e ≥10 com n pequeno |
